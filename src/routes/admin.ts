@@ -1,9 +1,8 @@
 import  express,{Request, Response, NextFunction} from 'express';
+import { RegisterAdmin } from '../controllers/adminController';
 const router = express.Router();
 
 /* GET users listing. */
-router.get('/', function(req, res:Response, next) {
-  res.send('respond with a resource');
-});
+router.post('/register_admin', RegisterAdmin);
 
 export default router;

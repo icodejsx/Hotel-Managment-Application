@@ -12,11 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RegisterAdmin = void 0;
+exports.AdminLogin = exports.RegisterAdmin = void 0;
 const utils_1 = require("../utils/utils");
 const adminModles_1 = __importDefault(require("../models/adminModles"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const jwtsecret = process.env.JWT_SECRET;
+//  Register Admin  controllers
 const RegisterAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const firstName = req.body.firstName;
@@ -63,3 +65,45 @@ const RegisterAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.RegisterAdmin = RegisterAdmin;
+// Admin login  controllers
+const AdminLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userName = req.body.userName;
+        const password = req.body.password;
+        //validate Admin
+        const validateAdmin = utils_1.LoginSchema.validate(req.body, utils_1.option);
+        if (validateAdmin.error) {
+            res.status(400).json({ Error: validateAdmin.error.details[0].message });
+        }
+        // Verify if Admin Exists 
+        const admin = (yield adminModles_1.default.findOne({
+            userName: userName,
+        }));
+        // verify If Admin Dose not Exists
+        if (!adminModles_1.default) {
+            return res.status(400).json({
+                error: "Amin not found",
+            });
+        }
+        // destructing admin to get id of admin 
+        const { _id } = admin;
+        //generate token
+        const token = jsonwebtoken_1.default.sign({ _id }, jwtsecret, { expiresIn: "30d" });
+        //compare  Admin password
+        const validAdmin = yield bcryptjs_1.default.compare(password, admin.password);
+        if (validAdmin) {
+            return res.status(200).json({
+                msg: " Admin Login Successful",
+                admin,
+                token,
+            });
+        }
+        return res.status(400).json({
+            error: "Invalid password",
+        });
+    }
+    catch (error) {
+        console.error("Something went wrong durring Admin login in");
+    }
+});
+exports.AdminLogin = AdminLogin;

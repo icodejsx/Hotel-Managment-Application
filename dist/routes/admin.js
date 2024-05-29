@@ -8,4 +8,5 @@ const adminController_1 = require("../controllers/adminController");
 const router = express_1.default.Router();
 /* GET users listing. */
 router.post('/register_admin', adminController_1.RegisterAdmin);
+router.post('/login_admin', adminController_1.AdminLogin);
 exports.default = router;

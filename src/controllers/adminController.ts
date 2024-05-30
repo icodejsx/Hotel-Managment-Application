@@ -19,21 +19,17 @@ export const RegisterAdmin = async (req: Request, res: Response) => {
         const confirm_password = req.body.confirm_password;
         const phoneNumber = req.body.phoneNumber;
         const profilePhoto = req.body.profilePhoto;
-
-
-
+        
+      
         // validating Admin details
-
         const validateAdmin = RegisterSchema.validate(req.body, option)
         if (validateAdmin.error) {
-             res.status(400).json({ Error: validateAdmin.error.details[0].message });
-        }
-
-
+        res.status(400).json({ Error: validateAdmin.error.details[0].message });
+      }
+      
         //  Hashing password
-        const passwordHash = await bcrypt.hash(password, await bcrypt.genSalt(12));
-
-
+      const passwordHash = await bcrypt.hash(password, await bcrypt.genSalt(12));
+      
 
         // finding the the admin exist? or not 
         const admin = await Admin.findOne({ userName: userName });
@@ -125,3 +121,47 @@ export const AdminLogin = async (req: Request, res: Response) => {
   }
 
 }
+
+
+
+// updating admin profile controllers 
+export const UpdateAdminProfile = async (req: Request, res: Response) => {
+ try {
+    const { firstName, lastName, email, userName, password, phoneNumber, profilePhoto } = req.body;
+
+    // Find the admin by username
+    const admin = await Admin.findOne({ userName });
+
+    // If admin does not exist, return an error
+    if (!admin) {
+      return res.status(404).json({ error: 'Admin not found' });
+    }
+
+    // Update admin profile fields
+    if (lastName) admin.lastName = lastName;
+    if (email) admin.email = email;
+    if (phoneNumber) admin.phoneNumber = phoneNumber;
+    if (profilePhoto) admin.profilePhoto = profilePhoto;
+
+    // If password is provided, hash and update it
+    if (password) {
+      const passwordHash = await bcrypt.hash(password, await bcrypt.genSalt(12));
+      admin.password = passwordHash;
+    }
+
+    // Save the updated admin profile
+    await admin.save();
+
+    // Generate JWT token
+    const token = jwt.sign({ _id: admin._id }, jwtsecret, { expiresIn: '30d' });
+
+    res.status(200).json({
+      message: 'Admin profile updated successfully',
+      admin,
+      token,
+    });
+  } catch (error) {
+    console.error('Error updating admin profile:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

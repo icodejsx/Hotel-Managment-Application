@@ -9,4 +9,5 @@ const router = express_1.default.Router();
 /* GET users listing. */
 router.post('/register_admin', adminController_1.RegisterAdmin);
 router.post('/login_admin', adminController_1.AdminLogin);
+router.post('/update_admin', adminController_1.UpdateAdminProfile);
 exports.default = router;

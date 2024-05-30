@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AdminLogin = exports.RegisterAdmin = void 0;
+exports.UpdateAdminProfile = exports.AdminLogin = exports.RegisterAdmin = void 0;
 const utils_1 = require("../utils/utils");
 const adminModles_1 = __importDefault(require("../models/adminModles"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
@@ -107,3 +107,43 @@ const AdminLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.AdminLogin = AdminLogin;
+// updating admin profile controllers 
+const UpdateAdminProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { firstName, lastName, email, userName, password, phoneNumber, profilePhoto } = req.body;
+        // Find the admin by username
+        const admin = yield adminModles_1.default.findOne({ userName });
+        // If admin does not exist, return an error
+        if (!admin) {
+            return res.status(404).json({ error: 'Admin not found' });
+        }
+        // Update admin profile fields
+        if (lastName)
+            admin.lastName = lastName;
+        if (email)
+            admin.email = email;
+        if (phoneNumber)
+            admin.phoneNumber = phoneNumber;
+        if (profilePhoto)
+            admin.profilePhoto = profilePhoto;
+        // If password is provided, hash and update it
+        if (password) {
+            const passwordHash = yield bcryptjs_1.default.hash(password, yield bcryptjs_1.default.genSalt(12));
+            admin.password = passwordHash;
+        }
+        // Save the updated admin profile
+        yield admin.save();
+        // Generate JWT token
+        const token = jsonwebtoken_1.default.sign({ _id: admin._id }, jwtsecret, { expiresIn: '30d' });
+        res.status(200).json({
+            message: 'Admin profile updated successfully',
+            admin,
+            token,
+        });
+    }
+    catch (error) {
+        console.error('Error updating admin profile:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+exports.UpdateAdminProfile = UpdateAdminProfile;

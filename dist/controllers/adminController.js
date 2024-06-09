@@ -118,6 +118,8 @@ const UpdateAdminProfile = (req, res) => __awaiter(void 0, void 0, void 0, funct
             return res.status(404).json({ error: 'Admin not found' });
         }
         // Update admin profile fields
+        if (firstName)
+            admin.firstName = firstName;
         if (lastName)
             admin.lastName = lastName;
         if (email)

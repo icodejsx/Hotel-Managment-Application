@@ -65,7 +65,7 @@ export const RegisterAdmin = async (req: Request, res: Response) => {
 }
 
 
-// Admin login  controllers
+// Admin login  controller
 export const AdminLogin = async (req: Request, res: Response) => {
 
   try {
@@ -136,8 +136,8 @@ export const UpdateAdminProfile = async (req: Request, res: Response) => {
     if (!admin) {
       return res.status(404).json({ error: 'Admin not found' });
     }
-
-    // Update admin profile fields
+   // Update admin profile fields
+   if (firstName) admin.firstName = firstName;
     if (lastName) admin.lastName = lastName;
     if (email) admin.email = email;
     if (phoneNumber) admin.phoneNumber = phoneNumber;
